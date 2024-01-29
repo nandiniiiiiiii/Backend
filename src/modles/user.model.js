@@ -1,5 +1,5 @@
 import mongoose, {Schema} from "mongoose";
-import jws from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
@@ -54,7 +54,7 @@ userSchema.pre("save", async function(next){
     next()
 })
 
-userSchema.method.isPasswordCorrect = async function (password){
+userSchema.methods.isPasswordCorrect = async function (password){
     return await bcrypt.compare(password,this.password)
 }
 
