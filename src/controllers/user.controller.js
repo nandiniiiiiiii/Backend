@@ -8,13 +8,13 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 const generateAccessandRefereshTokens = async (userId) => {
     try {
         const User = await user.findById(userId)
-        const accesstokenGenerated = User.generateAccessToken()
-        const refreshtokenGenerated = User.generateRefreshToken()
+        const accessToken = User.generateAccessToken()
+        const refreshToken = User.generateRefreshToken()
 
-        User.refreshtokenGenerated = refreshtokenGenerated
+        User.refreshToken = refreshToken
         await User.save({ validateBeforeSave: false })
 
-        return { accesstokenGenerated, refreshtokenGenerated }
+        return { accessToken, refreshToken }
 
     } catch (error) {
         throw new ApiError(500, "something went wrong while generating refresh and access tokens")
@@ -51,7 +51,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     if (!avatarLocalPath) {
-        throw new ApiError(400, "Avtar is required");
+        throw new ApiError(400, "Avatar is required");
     }
 
     //4- upload to cloudinary
@@ -114,7 +114,8 @@ const loginuser = asyncHandler(async (req, res) => {
     }
 
     //access and reresh tokens
-    const { accesstokenGenerated, refreshtokenGenerated } = await generateAccessandRefereshTokens(User._id)
+    const { accessToken , refreshToken} = await generateAccessandRefereshTokens(User._id)
+    // console.log(accessToken,refreshToken)
     const loginUser = await user.findById(User._id).select("-passsword -refreshToken");
 
     //sending to cookies
@@ -124,13 +125,13 @@ const loginuser = asyncHandler(async (req, res) => {
     }
 
     return res.status(200)
-        .cookie("accesstokenGenerated", accesstokenGenerated, options)
-        .cookie("refreshtokenGenerated", refreshtokenGenerated, options)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
         .json(
             new ApiResponse(
                 200,
                 {
-                    user: loginUser, accesstokenGenerated, refreshtokenGenerated
+                    user: loginUser, accessToken, refreshToken
                 },
                 "User logged in Successfully"
             )
@@ -142,7 +143,7 @@ const logoutuser = asyncHandler(async (req, res) => {
         req.User._id,
         {
             $set: {
-                refreshtokenGenerated: undefined
+                refreshToken: undefined
             }
         },
         {
@@ -156,8 +157,8 @@ const logoutuser = asyncHandler(async (req, res) => {
     }
 
     return res.status(200)
-    .clearcookie("accesstokenGenerated",options)
-    .clearcookie("refreshtokenGenerated",options)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
     .json(
         new ApiResponse(
             200,
