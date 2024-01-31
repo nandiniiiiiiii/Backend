@@ -19,3 +19,5 @@ jwt(json web token) - for encryption
 # cloudinary: use to manage file uplode
 npm i cloudinary - local to server
 npm i multer - take file from user and stores it in local storage
+
+# MongoDb Aggerigation Pipelines
