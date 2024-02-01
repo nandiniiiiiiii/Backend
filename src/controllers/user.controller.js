@@ -217,7 +217,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body
 
-    const User = await user.findById(req.user?._id)
+    const User = await user.findById(req.User?._id)
+    if(!User){
+        throw new ApiError(400, "no user avaliable")
+    }
     const isPasswordCorrect = await User.isPasswordCorrect(oldPassword);
     if (!isPasswordCorrect) {
         throw new ApiError(400, "Invalid old password")
@@ -231,9 +234,8 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 })
 
-const getCurrentUser = asyncHandler(async (res, req) => {
-    return res
-        .status(200)
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res.status(200)
         .json(new ApiResponse(200, req.User, "current user fetched successfully"))
 })
 
@@ -389,7 +391,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     const User = await user.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(req.user._id)
+                _id: new mongoose.Types.ObjectId(req.User._id)
             }
         },
         {
@@ -427,7 +429,10 @@ const getWatchHistory = asyncHandler(async (req, res) => {
             }
         }
     ])
-    
+    if(!User){
+        new ApiError(400,"User not found")
+    }
+
     return res.status(200)
         .json(
             new ApiResponse(
